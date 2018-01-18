@@ -390,21 +390,24 @@ export default function createAnimatableComponent(WrappedComponent) {
         easing = Easing.out(easing);
       }
 
-      Animated.timing(animationValue, {
+      let animation = Animated.timing(animationValue, {
         toValue,
         easing,
         isInteraction: iterationCount <= 1,
         duration: duration || this.props.duration || 1000,
         useNativeDriver,
-      }).start(endState => {
-        currentIteration += 1;
-        if (
-          endState.finished &&
-          this.props.animation &&
-          (iterationCount === 'infinite' || currentIteration < iterationCount)
-        ) {
-          this.startAnimation(duration, currentIteration, callback);
-        } else if (callback) {
+      });
+
+      if (!(iterationCount <= 1)) {
+        const config = iterationCount !== 'infinite'
+          ? {iterations: iterationCount}
+          : {};
+
+        animation = Animated.loop(animation, config);
+      }
+
+      animation.start(endState => {
+        if (callback) {
           callback(endState);
         }
       });
