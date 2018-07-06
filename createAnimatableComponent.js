@@ -412,9 +412,21 @@ export default function createAnimatableComponent(WrappedComponent) {
         delay: iterationDelay || 0,
       };
 
-      Animated.timing(animationValue, config).start(endState => {
+      let animation = Animated.timing(animationValue, config);
+      const canLoop =
+        !iterationDelay &&
+        (iterationCount === 'infinite' || iterationCount > 1);
+      if (canLoop) {
+        const loopConfig =
+          iterationCount !== 'infinite' ? { iterations: iterationCount } : {};
+
+        animation = Animated.loop(animation, loopConfig);
+      }
+
+      animation.start(endState => {
         currentIteration += 1;
         if (
+          !canLoop &&
           endState.finished &&
           this.props.animation &&
           (iterationCount === 'infinite' || currentIteration < iterationCount)
