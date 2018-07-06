@@ -411,21 +411,12 @@ export default function createAnimatableComponent(WrappedComponent) {
         useNativeDriver,
         delay: iterationDelay || 0,
       };
+      const iterations = iterationCount === 'infinite' ? -1 : iterationCount;
 
-      Animated.timing(animationValue, config).start(endState => {
-        currentIteration += 1;
-        if (
-          endState.finished &&
-          this.props.animation &&
-          (iterationCount === 'infinite' || currentIteration < iterationCount)
-        ) {
-          this.startAnimation(
-            duration,
-            currentIteration,
-            iterationDelay,
-            callback,
-          );
-        } else if (callback) {
+      Animated.loop(Animated.timing(animationValue, config), {
+        iterations,
+      }).start(endState => {
+        if (callback) {
           callback(endState);
         }
       });
