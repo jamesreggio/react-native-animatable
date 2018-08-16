@@ -562,7 +562,7 @@ export default function createAnimatableComponent(WrappedComponent) {
         <Animatable
           ref={this.handleRef}
           style={[
-            style,
+            withoutTransition(style, transition),
             this.state.animationStyle,
             wrapStyleTransforms(this.state.transitionStyle),
           ]}
@@ -571,4 +571,19 @@ export default function createAnimatableComponent(WrappedComponent) {
       );
     }
   };
+}
+
+function withoutTransition(style, transition) {
+  if (!transition) {
+    return style;
+  }
+
+  style = flattenStyle(style);
+  transition = Array.isArray(transition) ? transition : [transition];
+
+  transition.forEach(key => {
+    delete style[key];
+  });
+
+  return wrapStyleTransforms(style);
 }
